@@ -20,11 +20,58 @@ python-Levenshtein = "~0.26.1"
 openai = "~1.60.1"
 anthropic = "~0.45.0"
 attrs = "~25.1.0"
+typer = "^0.15.1"
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev]
+optional = true
+
+[tool.poetry.group.dev.dependencies]
+ruff = "^0.9.3"
+
+[tool.ruff]
+cache-dir = ".cache/ruff"
+line-length = 120
+
+[tool.ruff.lint]
+select = [
+    "E", # pycodestyle errors
+    "W", # pycodestyle warnings
+    "F", # pyflakes
+    "I", # isort
+    "C", # flake8-comprehensions
+    "B", # flake8-bugbear
+    "D", # docstring
+]
+ignore = [
+    "E203", # incompatible with black
+    "E501", # line too long, handled by black
+    "C901", # too complex
+    "D", # TODO: All docstrings are disabled for now
+    #    "F722"
+]
+
+[tool.ruff.lint.isort]
+order-by-type = true
+relative-imports-order = "closest-to-furthest"
+extra-standard-library = ["typing"]
+section-order = ["future", "standard-library", "third-party", "first-party", "local-folder"]
+known-first-party = []
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.format]
+# Like Black, use double quotes for strings.
+quote-style = "double"
+# Like Black, indent with spaces, rather than tabs.
+indent-style = "space"
+# Like Black, respect magic trailing commas.
+skip-magic-trailing-comma = false
+# Like Black, automatically detect the appropriate line ending.
+line-ending = "auto"
 
 
-[tool.poetry.scripts]
+
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
