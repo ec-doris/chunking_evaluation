@@ -1,6 +1,9 @@
+import logging
+from importlib.resources import files
 from pprint import pprint
 from typing import Any, cast
 
+import mlflow
 from chromadb import Documents, Embeddings
 from chromadb.utils.embedding_functions.sentence_transformer_embedding_function import (
     SentenceTransformerEmbeddingFunction,
@@ -11,6 +14,8 @@ from chunking_evaluation import GeneralEvaluation
 from chunking_evaluation.chunking import RecursiveTokenChunker
 
 app = Typer()
+
+logging.basicConfig(level=logging.INFO, format="%(asctime)s -  %(name)s - %(levelname)s - %(message)s")
 
 
 class NomicSentenceTransformerEmbeddingFunction(SentenceTransformerEmbeddingFunction):
@@ -41,18 +46,33 @@ class NomicSentenceTransformerEmbeddingFunction(SentenceTransformerEmbeddingFunc
 
 @app.command()
 def evaluate():
-    chunker = RecursiveTokenChunker(chunk_size=400, chunk_overlap=200)
-    evaluation = GeneralEvaluation()
-    chunk_embedding = NomicSentenceTransformerEmbeddingFunction(
-        model_name="nomic-ai/nomic-embed-text-v1.5", device="cuda", trust_remote_code=True, prefix="search_document"
-    )
-    query_embedding = NomicSentenceTransformerEmbeddingFunction(
-        model_name="nomic-ai/nomic-embed-text-v1.5", device="cuda", trust_remote_code=True, prefix="search_query"
-    )
+    tracking_path = (files("chunking_evaluation") / "../mlflow.db").resolve()
 
-    results = evaluation.run(
-        chunker, chunk_embedding_function=chunk_embedding, query_embedding_function=query_embedding
-    )
+    mlflow.tracking.set_tracking_uri("sqlite:///" + str(tracking_path))
+    with mlflow.start_run() as run:
+        params = dict(chunk_size=400, chunk_overlap=200)  # noqa: C408
+        chunker = RecursiveTokenChunker(**params)
+        mlflow.log_param("chunker", chunker.__class__.__name__)
+        mlflow.log_params(params)
+
+        evaluation = GeneralEvaluation()
+        mlflow.log_param("corpora_paths", sorted(evaluation.corpora_id_paths))
+        mlflow.log_param("questions_path", evaluation.questions_csv_path)
+
+        chunk_embedding = NomicSentenceTransformerEmbeddingFunction(
+            model_name="nomic-ai/nomic-embed-text-v1.5", device="cuda", trust_remote_code=True, prefix="search_document"
+        )
+        query_embedding = NomicSentenceTransformerEmbeddingFunction(
+            model_name="nomic-ai/nomic-embed-text-v1.5", device="cuda", trust_remote_code=True, prefix="search_query"
+        )
+
+        results = evaluation.run(
+            chunker, chunk_embedding_function=chunk_embedding, query_embedding_function=query_embedding
+        )
+
+        del results["corpora_scores"]  # TODO log more details
+        # TODO: log dataset
+        mlflow.log_metrics(results)
     pprint(results)
 
 
