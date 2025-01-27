@@ -8,9 +8,8 @@ import numpy as np
 import pandas as pd
 from openai import OpenAI
 
+from chunking_evaluation.evaluation_framework.base_evaluation import BaseEvaluation
 from chunking_evaluation.utils import rigorous_document_search
-
-from .base_evaluation import BaseEvaluation
 
 
 class SyntheticEvaluation(BaseEvaluation):

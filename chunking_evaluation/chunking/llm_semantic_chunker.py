@@ -1,12 +1,10 @@
-
 import anthropic
 import backoff
 from tqdm import tqdm
 
-from chunking_evaluation.chunking import RecursiveTokenChunker
+from chunking_evaluation.chunking.base_chunker import BaseChunker
+from chunking_evaluation.chunking.recursive_token_chunker import RecursiveTokenChunker
 from chunking_evaluation.utils import openai_token_count
-
-from .base_chunker import BaseChunker
 
 
 class AnthropicClient:
@@ -115,7 +113,6 @@ class LLMSemanticChunker(BaseChunker):
         split_indices = []
 
         short_cut = len(split_indices) > 0
-
 
         current_chunk = 0
 

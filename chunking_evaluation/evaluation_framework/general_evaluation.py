@@ -1,6 +1,6 @@
 from importlib import resources
 
-from .base_evaluation import BaseEvaluation
+from chunking_evaluation.evaluation_framework.base_evaluation import BaseEvaluation
 
 
 class GeneralEvaluation(BaseEvaluation):

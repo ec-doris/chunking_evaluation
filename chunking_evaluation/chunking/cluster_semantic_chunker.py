@@ -2,10 +2,9 @@ from typing import List
 
 import numpy as np
 
-from chunking_evaluation.chunking import RecursiveTokenChunker
+from chunking_evaluation.chunking.base_chunker import BaseChunker
+from chunking_evaluation.chunking.recursive_token_chunker import RecursiveTokenChunker
 from chunking_evaluation.utils import get_openai_embedding_function, openai_token_count
-
-from .base_chunker import BaseChunker
 
 
 class ClusterSemanticChunker(BaseChunker):

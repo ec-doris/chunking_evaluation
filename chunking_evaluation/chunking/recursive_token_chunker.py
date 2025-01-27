@@ -5,9 +5,8 @@
 import re
 from typing import Any, List, Optional
 
+from chunking_evaluation.chunking.fixed_token_chunker import TextSplitter
 from chunking_evaluation.utils import Language
-
-from .fixed_token_chunker import TextSplitter
 
 
 def _split_text_with_regex(text: str, separator: str, keep_separator: bool) -> List[str]:
