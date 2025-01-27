@@ -406,7 +406,7 @@ class BaseEvaluation:
                         question_collection = questions_client.get_collection(
                             "auto_questions_sentence_transformer", embedding_function=embedding_function
                         )
-                    except:
+                    except Exception as e:
                         print(
                             "Warning: Failed to use the frozen embeddings originally used in the paper. As a result, this package will now generate a new set of embeddings. The change should be minimal and only come from the noise floor of SentenceTransformer's embedding function. The error: ",
                             e,
