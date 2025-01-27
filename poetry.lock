@@ -448,6 +448,17 @@ files = [
 ]
 
 [[package]]
+name = "einops"
+version = "0.8.0"
+description = "A new flavour of deep learning operations"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "einops-0.8.0-py3-none-any.whl", hash = "sha256:9572fb63046264a862693b0a87088af3bdc8c068fde03de63453cbbde245465f"},
+    {file = "einops-0.8.0.tar.gz", hash = "sha256:63486517fed345712a8385c100cb279108d9d47e6ae59099b07657e983deae85"},
+]
+
+[[package]]
 name = "fastapi"
 version = "0.115.7"
 description = "FastAPI framework, high performance, easy to learn, fast to code, ready for production"
@@ -3718,4 +3729,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.0"
 python-versions = "~3.12"
-content-hash = "15a4bc97db87b5b3295d071ad53d1a8c5e813569ca5f8b217277ea5c16e21698"
+content-hash = "b448c92352a0f2a2cc05c7509cc9e01a1ef3dd0fdeab9e5d453c713999db419b"
