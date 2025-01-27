@@ -21,6 +21,7 @@ openai = "~1.60.1"
 anthropic = "~0.45.0"
 attrs = "~25.1.0"
 typer = "^0.15.1"
+sentence-transformers = "^3.4.0"
 
 [tool.poetry.group.dev]
 optional = true
