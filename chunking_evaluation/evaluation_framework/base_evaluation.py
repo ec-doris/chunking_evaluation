@@ -338,7 +338,14 @@ class BaseEvaluation:
 
         self.questions_df["references"] = self.questions_df["references"].apply(safe_json_loads)
 
-    def run(self, chunker, embedding_function=None, retrieve: int = 5, db_to_save_chunks: str = None):
+    def run(
+        self,
+        chunker,
+        chunk_embedding_function=None,
+        query_embedding_function=None,
+        retrieve: int = 5,
+        db_to_save_chunks: str = None,
+    ):
         """
         This function runs the evaluation over the provided chunker.
 
@@ -348,14 +355,16 @@ class BaseEvaluation:
         retrieve: The number of chunks to retrieve per question. If set to -1, the function will retrieve the minimum number of chunks that contain excerpts for a given query. This is typically around 1 to 3 but can vary by question. By setting a specific value for retrieve, this number is fixed for all queries.
         """
         self._load_questions_df()
-        if embedding_function is None:
-            embedding_function = get_openai_embedding_function()
+        if chunk_embedding_function is None:
+            chunk_embedding_function = get_openai_embedding_function()
+        if query_embedding_function is None:
+            query_embedding_function = chunk_embedding_function
 
         collection = None
         if db_to_save_chunks is not None:
             chunk_size = chunker._chunk_size if hasattr(chunker, "_chunk_size") else "0"
             chunk_overlap = chunker._chunk_overlap if hasattr(chunker, "_chunk_overlap") else "0"
-            embedding_function_name = embedding_function.__class__.__name__
+            embedding_function_name = chunk_embedding_function.__class__.__name__
             if embedding_function_name == "SentenceTransformerEmbeddingFunction":
                 embedding_function_name = "SentEmbFunc"
             collection_name = (
@@ -369,15 +378,15 @@ class BaseEvaluation:
             )
             try:
                 chunk_client = chromadb.PersistentClient(path=db_to_save_chunks)
-                collection = chunk_client.get_collection(collection_name, embedding_function=embedding_function)
+                collection = chunk_client.get_collection(collection_name, embedding_function=chunk_embedding_function)
             except Exception:
                 # Get collection throws if the collection does not exist. We will create it below if it does not exist.
                 collection = self._chunker_to_collection(
-                    chunker, embedding_function, chroma_db_path=db_to_save_chunks, collection_name=collection_name
+                    chunker, chunk_embedding_function, chroma_db_path=db_to_save_chunks, collection_name=collection_name
                 )
 
         if collection is None:
-            collection = self._chunker_to_collection(chunker, embedding_function)
+            collection = self._chunker_to_collection(chunker, chunk_embedding_function)
 
         question_collection = None
 
@@ -386,25 +395,25 @@ class BaseEvaluation:
                 resources.files("chunking_evaluation.evaluation_framework") / "general_evaluation_data"
             ) as general_benchmark_path:
                 questions_client = chromadb.PersistentClient(path=os.path.join(general_benchmark_path, "questions_db"))
-                if embedding_function.__class__.__name__ == "OpenAIEmbeddingFunction":
+                if query_embedding_function.__class__.__name__ == "OpenAIEmbeddingFunction":
                     try:
-                        if embedding_function._model_name == "text-embedding-3-large":
+                        if query_embedding_function._model_name == "text-embedding-3-large":
                             question_collection = questions_client.get_collection(
-                                "auto_questions_openai_large", embedding_function=embedding_function
+                                "auto_questions_openai_large", embedding_function=query_embedding_function
                             )
-                        elif embedding_function._model_name == "text-embedding-3-small":
+                        elif query_embedding_function._model_name == "text-embedding-3-small":
                             question_collection = questions_client.get_collection(
-                                "auto_questions_openai_small", embedding_function=embedding_function
+                                "auto_questions_openai_small", embedding_function=query_embedding_function
                             )
                     except Exception as e:
                         print(
                             "Warning: Failed to use the frozen embeddings originally used in the paper. As a result, this package will now generate a new set of embeddings. The change should be minimal and only come from the noise floor of OpenAI's embedding function. The error: ",
                             e,
                         )
-                elif embedding_function.__class__.__name__ == "SentenceTransformerEmbeddingFunction":
+                elif query_embedding_function.__class__.__name__ == "SentenceTransformerEmbeddingFunction":
                     try:
                         question_collection = questions_client.get_collection(
-                            "auto_questions_sentence_transformer", embedding_function=embedding_function
+                            "auto_questions_sentence_transformer", embedding_function=query_embedding_function
                         )
                     except Exception as e:
                         print(
@@ -420,7 +429,7 @@ class BaseEvaluation:
             except ValueError:
                 pass
             question_collection = self.chroma_client.create_collection(
-                "auto_questions", embedding_function=embedding_function, metadata={"hnsw:search_ef": 50}
+                "auto_questions", embedding_function=chunk_embedding_function, metadata={"hnsw:search_ef": 50}
             )
             question_collection.add(
                 documents=self.questions_df["question"].tolist(),
