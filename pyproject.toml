@@ -1,0 +1,31 @@
+[tool.poetry]
+name = "chunking_evaluation"
+version = "0.1.0"
+description = "A package to evaluate multiple chunking methods. It also provides two new chunking methods."
+authors = ["Brandon A. Smith <brandonsmithpmpuk@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+homepage = "https://github.com/yourusername/chunking_evaluation"
+packages = [{ include = "chunking_evaluation" }]
+
+[tool.poetry.dependencies]
+python = "~3.12"
+tiktoken = "~0.8.0"
+fuzzywuzzy = "~0.18.0"
+pandas = "~2.2.3"
+numpy = "~2.2.2"
+tqdm = "~4.67.1"
+chromadb = "~0.6.3"
+python-Levenshtein = "~0.26.1"
+openai = "~1.60.1"
+anthropic = "~0.45.0"
+attrs = "~25.1.0"
+
+[tool.poetry.dev-dependencies]
+
+
+[tool.poetry.scripts]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
