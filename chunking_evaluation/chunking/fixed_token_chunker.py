@@ -1,4 +1,3 @@
-
 # This script is adapted from the LangChain package, developed by LangChain AI.
 # Original code can be found at: https://github.com/langchain-ai/langchain/blob/master/libs/text-splitters/langchain_text_splitters/base.py
 # License: MIT License
@@ -28,6 +27,8 @@ from attr import dataclass
 logger = logging.getLogger(__name__)
 
 TS = TypeVar("TS", bound="TextSplitter")
+
+
 class TextSplitter(BaseChunker, ABC):
     """Interface for splitting text into chunks."""
 
@@ -53,8 +54,7 @@ class TextSplitter(BaseChunker, ABC):
         """
         if chunk_overlap > chunk_size:
             raise ValueError(
-                f"Got a larger chunk overlap ({chunk_overlap}) than chunk size "
-                f"({chunk_size}), should be smaller."
+                f"Got a larger chunk overlap ({chunk_overlap}) than chunk size ({chunk_size}), should be smaller."
             )
         self._chunk_size = chunk_size
         self._chunk_overlap = chunk_overlap
@@ -86,14 +86,10 @@ class TextSplitter(BaseChunker, ABC):
         total = 0
         for d in splits:
             _len = self._length_function(d)
-            if (
-                total + _len + (separator_len if len(current_doc) > 0 else 0)
-                > self._chunk_size
-            ):
+            if total + _len + (separator_len if len(current_doc) > 0 else 0) > self._chunk_size:
                 if total > self._chunk_size:
                     logger.warning(
-                        f"Created a chunk of size {total}, "
-                        f"which is longer than the specified {self._chunk_size}"
+                        f"Created a chunk of size {total}, which is longer than the specified {self._chunk_size}"
                     )
                 if len(current_doc) > 0:
                     doc = self._join_docs(current_doc, separator)
@@ -103,13 +99,9 @@ class TextSplitter(BaseChunker, ABC):
                     # - we have a larger chunk than in the chunk overlap
                     # - or if we still have any chunks and the length is long
                     while total > self._chunk_overlap or (
-                        total + _len + (separator_len if len(current_doc) > 0 else 0)
-                        > self._chunk_size
-                        and total > 0
+                        total + _len + (separator_len if len(current_doc) > 0 else 0) > self._chunk_size and total > 0
                     ):
-                        total -= self._length_function(current_doc[0]) + (
-                            separator_len if len(current_doc) > 1 else 0
-                        )
+                        total -= self._length_function(current_doc[0]) + (separator_len if len(current_doc) > 1 else 0)
                         current_doc = current_doc[1:]
             current_doc.append(d)
             total += _len + (separator_len if len(current_doc) > 1 else 0)
@@ -182,7 +174,8 @@ class TextSplitter(BaseChunker, ABC):
             kwargs = {**kwargs, **extra_kwargs}
 
         return cls(length_function=_tiktoken_encoder, **kwargs)
-    
+
+
 class FixedTokenChunker(TextSplitter):
     """Splitting text to tokens using model tokenizer."""
 
@@ -231,6 +224,7 @@ class FixedTokenChunker(TextSplitter):
         )
 
         return split_text_on_tokens(text=text, tokenizer=tokenizer)
+
 
 @dataclass(frozen=True)
 class Tokenizer:

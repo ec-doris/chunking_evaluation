@@ -4,7 +4,7 @@ from .evaluation_framework.synthetic_evaluation import SyntheticEvaluation
 from .utils import *
 
 __all__ = [
-    'BaseChunker',
-    'GeneralEvaluation',
-    'SyntheticEvaluation',
+    "BaseChunker",
+    "GeneralEvaluation",
+    "SyntheticEvaluation",
 ]

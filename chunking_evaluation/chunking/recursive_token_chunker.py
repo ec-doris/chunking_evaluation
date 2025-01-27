@@ -1,4 +1,3 @@
-
 # This script is adapted from the LangChain package, developed by LangChain AI.
 # Original code can be found at: https://github.com/langchain-ai/langchain/blob/master/libs/text-splitters/langchain_text_splitters/character.py
 # License: MIT License
@@ -9,9 +8,8 @@ from chunking_evaluation.utils import Language
 from .fixed_token_chunker import TextSplitter
 import re
 
-def _split_text_with_regex(
-    text: str, separator: str, keep_separator: bool
-) -> List[str]:
+
+def _split_text_with_regex(text: str, separator: str, keep_separator: bool) -> List[str]:
     # Now that we have the separator, split the text
     if separator:
         if keep_separator:
@@ -26,6 +24,7 @@ def _split_text_with_regex(
     else:
         splits = list(text)
     return [s for s in splits if s != ""]
+
 
 class RecursiveTokenChunker(TextSplitter):
     """Splitting text by recursively look at characters.
@@ -555,7 +554,4 @@ class RecursiveTokenChunker(TextSplitter):
             ]
 
         else:
-            raise ValueError(
-                f"Language {language} is not supported! "
-                f"Please choose from {list(Language)}"
-            )
+            raise ValueError(f"Language {language} is not supported! Please choose from {list(Language)}")

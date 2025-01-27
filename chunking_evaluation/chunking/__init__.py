@@ -5,4 +5,10 @@ from .llm_semantic_chunker import LLMSemanticChunker
 from .kamradt_modified_chunker import KamradtModifiedChunker
 
 # __all__ = ['ClusterSemanticChunker', 'LLMSemanticChunker']
-__all__ = ['ClusterSemanticChunker', 'LLMSemanticChunker', 'FixedTokenChunker', 'RecursiveTokenChunker', 'KamradtModifiedChunker']
+__all__ = [
+    "ClusterSemanticChunker",
+    "LLMSemanticChunker",
+    "FixedTokenChunker",
+    "RecursiveTokenChunker",
+    "KamradtModifiedChunker",
+]
