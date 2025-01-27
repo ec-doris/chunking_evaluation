@@ -2,15 +2,17 @@
 # Original code can be found at: https://github.com/FullStackRetrieval-com/RetrievalTutorials/blob/main/tutorials/LevelsOfTextSplitting/5_Levels_Of_Text_Splitting.ipynb
 
 from typing import Optional
-from .base_chunker import BaseChunker
-from .recursive_token_chunker import RecursiveTokenChunker
-from chunking_evaluation.utils import openai_token_count, get_openai_embedding_function
+
+import numpy as np
 from chromadb.api.types import (
     Embeddable,
     EmbeddingFunction,
 )
 
-import numpy as np
+from chunking_evaluation.utils import get_openai_embedding_function, openai_token_count
+
+from .base_chunker import BaseChunker
+from .recursive_token_chunker import RecursiveTokenChunker
 
 
 class KamradtModifiedChunker(BaseChunker):

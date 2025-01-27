@@ -1,10 +1,12 @@
-from .base_chunker import BaseChunker
-from chunking_evaluation.utils import openai_token_count
-from chunking_evaluation.chunking import RecursiveTokenChunker
+
 import anthropic
-import os
 import backoff
 from tqdm import tqdm
+
+from chunking_evaluation.chunking import RecursiveTokenChunker
+from chunking_evaluation.utils import openai_token_count
+
+from .base_chunker import BaseChunker
 
 
 class AnthropicClient:
@@ -96,7 +98,7 @@ class LLMSemanticChunker(BaseChunker):
                     + str(current_chunk)
                     + "."
                     + (
-                        f"\n\The previous response of {invalid_response} was invalid. DO NOT REPEAT THIS ARRAY OF NUMBERS. Please try again."
+                        f"\n\\The previous response of {invalid_response} was invalid. DO NOT REPEAT THIS ARRAY OF NUMBERS. Please try again."
                         if invalid_response
                         else ""
                     )
@@ -114,7 +116,6 @@ class LLMSemanticChunker(BaseChunker):
 
         short_cut = len(split_indices) > 0
 
-        from tqdm import tqdm
 
         current_chunk = 0
 

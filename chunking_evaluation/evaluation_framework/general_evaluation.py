@@ -1,6 +1,6 @@
-from .base_evaluation import BaseEvaluation
 from importlib import resources
-from pathlib import Path
+
+from .base_evaluation import BaseEvaluation
 
 
 class GeneralEvaluation(BaseEvaluation):

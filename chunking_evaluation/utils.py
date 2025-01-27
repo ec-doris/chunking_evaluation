@@ -1,10 +1,10 @@
-from enum import Enum
-import re
-from fuzzywuzzy import fuzz
-from fuzzywuzzy import process
 import os
-from chromadb.utils import embedding_functions
+import re
+from enum import Enum
+
 import tiktoken
+from chromadb.utils import embedding_functions
+from fuzzywuzzy import fuzz, process
 
 
 def find_query_despite_whitespace(document, query):

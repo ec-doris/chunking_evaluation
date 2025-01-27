@@ -2,9 +2,8 @@
 # Original code can be found at: https://github.com/langchain-ai/langchain/blob/master/libs/text-splitters/langchain_text_splitters/base.py
 # License: MIT License
 
-from abc import ABC, abstractmethod
-from enum import Enum
 import logging
+from abc import ABC, abstractmethod
 from typing import (
     AbstractSet,
     Any,
@@ -14,15 +13,14 @@ from typing import (
     List,
     Literal,
     Optional,
-    Sequence,
     Type,
     TypeVar,
     Union,
 )
-from .base_chunker import BaseChunker
-
 
 from attr import dataclass
+
+from .base_chunker import BaseChunker
 
 logger = logging.getLogger(__name__)
 

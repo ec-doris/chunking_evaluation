@@ -1,11 +1,11 @@
-from .base_chunker import BaseChunker
 from typing import List
 
 import numpy as np
-import tiktoken
-from chunking_evaluation.chunking import RecursiveTokenChunker
 
+from chunking_evaluation.chunking import RecursiveTokenChunker
 from chunking_evaluation.utils import get_openai_embedding_function, openai_token_count
+
+from .base_chunker import BaseChunker
 
 
 class ClusterSemanticChunker(BaseChunker):

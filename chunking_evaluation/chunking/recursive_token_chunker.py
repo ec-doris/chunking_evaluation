@@ -2,11 +2,12 @@
 # Original code can be found at: https://github.com/langchain-ai/langchain/blob/master/libs/text-splitters/langchain_text_splitters/character.py
 # License: MIT License
 
-from typing import Any, List, Optional
-from .base_chunker import BaseChunker
-from chunking_evaluation.utils import Language
-from .fixed_token_chunker import TextSplitter
 import re
+from typing import Any, List, Optional
+
+from chunking_evaluation.utils import Language
+
+from .fixed_token_chunker import TextSplitter
 
 
 def _split_text_with_regex(text: str, separator: str, keep_separator: bool) -> List[str]:

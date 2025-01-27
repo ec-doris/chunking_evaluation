@@ -1,13 +1,12 @@
-from typing import Callable
-from chunking_evaluation.utils import rigorous_document_search, get_openai_embedding_function
-import chromadb.utils.embedding_functions as embedding_functions
-import os
-import pandas as pd
 import json
+import os
+from importlib import resources
+
 import chromadb
 import numpy as np
-from typing import List
-from importlib import resources
+import pandas as pd
+
+from chunking_evaluation.utils import get_openai_embedding_function, rigorous_document_search
 
 
 def sum_of_ranges(ranges):
@@ -310,7 +309,7 @@ class BaseEvaluation:
         if collection is None:
             try:
                 self.chroma_client.delete_collection(collection_name)
-            except ValueError as e:
+            except ValueError:
                 pass
             collection = self.chroma_client.create_collection(
                 collection_name, embedding_function=embedding_function, metadata={"hnsw:search_ef": 50}
@@ -371,7 +370,7 @@ class BaseEvaluation:
             try:
                 chunk_client = chromadb.PersistentClient(path=db_to_save_chunks)
                 collection = chunk_client.get_collection(collection_name, embedding_function=embedding_function)
-            except Exception as e:
+            except Exception:
                 # Get collection throws if the collection does not exist. We will create it below if it does not exist.
                 collection = self._chunker_to_collection(
                     chunker, embedding_function, chroma_db_path=db_to_save_chunks, collection_name=collection_name
@@ -418,7 +417,7 @@ class BaseEvaluation:
             #     print("FAILED TO LOAD GENERAL EVALUATION")
             try:
                 self.chroma_client.delete_collection("auto_questions")
-            except ValueError as e:
+            except ValueError:
                 pass
             question_collection = self.chroma_client.create_collection(
                 "auto_questions", embedding_function=embedding_function, metadata={"hnsw:search_ef": 50}

@@ -1,15 +1,16 @@
-from typing import List
-import os
 import json
+import os
 import random
+from importlib import resources
+from typing import List
+
+import numpy as np
+import pandas as pd
+from openai import OpenAI
 
 from chunking_evaluation.utils import rigorous_document_search
-from .base_evaluation import BaseEvaluation
 
-import pandas as pd
-import numpy as np
-from openai import OpenAI
-from importlib import resources
+from .base_evaluation import BaseEvaluation
 
 
 class SyntheticEvaluation(BaseEvaluation):
