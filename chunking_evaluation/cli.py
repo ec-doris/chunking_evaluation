@@ -1,16 +1,19 @@
 import logging
 from importlib.resources import files
+from pathlib import Path
 from pprint import pprint
-from typing import Any, cast
+from typing import Annotated, Any, cast
 
 import mlflow
+import typer
 from chromadb import Documents, Embeddings
 from chromadb.utils.embedding_functions.sentence_transformer_embedding_function import (
     SentenceTransformerEmbeddingFunction,
 )
+from openai import OpenAI
 from typer import Typer
 
-from chunking_evaluation import GeneralEvaluation
+from chunking_evaluation import GeneralEvaluation, SyntheticEvaluation
 from chunking_evaluation.chunking import RecursiveTokenChunker
 
 app = Typer()
@@ -124,6 +127,36 @@ def evaluate():
         # TODO: log dataset
         mlflow.log_metrics(results)
     pprint(results)
+
+
+@app.command()
+def generate_data(
+    corpora_path: Path,
+    queries_path: Path,
+    generation_base_url: Annotated[str, typer.Option()],
+    generation_api_key: Annotated[str, typer.Option()],
+    generation_model_name: Annotated[str, typer.Option()],
+    embedding_base_url: Annotated[str, typer.Option()],
+    embedding_api_key: Annotated[str, typer.Option()],
+    embedding_model_name: Annotated[str, typer.Option()],
+):
+    evaluation = SyntheticEvaluation(
+        corpora_paths=[str(p) for p in corpora_path.glob("*.txt")],
+        queries_csv_path=str(queries_path),
+        completion_client=OpenAI(base_url=generation_base_url, api_key=generation_api_key),
+        completion_model_name=generation_model_name,
+        embedding_client=OpenAI(base_url=embedding_base_url, api_key=embedding_api_key),
+        embedding_model_name=embedding_model_name,
+    )
+
+    # Generate queries and excerpts, and save to CSV
+    evaluation.generate_queries_and_excerpts()
+
+    # Apply filter to remove queries with poor excerpts
+    evaluation.filter_poor_excerpts(threshold=0.36)
+
+    # Apply filter to remove duplicates
+    evaluation.filter_duplicates(threshold=0.6)
 
 
 if __name__ == "__main__":

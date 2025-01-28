@@ -14,12 +14,26 @@ from chunking_evaluation.utils import rigorous_document_search
 
 class SyntheticEvaluation(BaseEvaluation):
     def __init__(
-        self, corpora_paths: List[str], queries_csv_path: str, chroma_db_path: str = None, openai_api_key=None
+        self,
+        corpora_paths: List[str],
+        queries_csv_path: str,
+        completion_client: OpenAI,
+        completion_model_name: str,
+        embedding_client: OpenAI,
+        embedding_model_name: str,
+        completion_max_tokens: int = 600,
+        chroma_db_path: str = None,
     ):
         super().__init__(questions_csv_path=queries_csv_path, chroma_db_path=chroma_db_path)
         self.corpora_paths = corpora_paths
         self.questions_csv_path = queries_csv_path
-        self.client = OpenAI(api_key=openai_api_key)
+
+        self.completion_client: OpenAI = completion_client
+        self.completion_model_name = completion_model_name
+        self.completion_max_tokens: int = completion_max_tokens
+
+        self.embedding_client: OpenAI = embedding_client
+        self.embedding_model_name = embedding_model_name
 
         self.synth_questions_df = None
 
@@ -82,10 +96,10 @@ class SyntheticEvaluation(BaseEvaluation):
 
         tagged_text, tag_indexes = self._tag_text(document)
 
-        completion = self.client.chat.completions.create(
-            model="gpt-4-turbo",
+        completion = self.completion_client.chat.completions.create(
+            model=self.completion_model_name,
             response_format={"type": "json_object"},
-            max_tokens=600,
+            max_tokens=self.completion_max_tokens,
             messages=[
                 {"role": "system", "content": self.question_maker_approx_system_prompt},
                 {
@@ -149,10 +163,10 @@ class SyntheticEvaluation(BaseEvaluation):
         else:
             prev_questions_str = ""
 
-        completion = self.client.chat.completions.create(
-            model="gpt-4-turbo",
+        completion = self.completion_client.chat.completions.create(
+            model=self.completion_model_name,
             response_format={"type": "json_object"},
-            max_tokens=600,
+            max_tokens=self.completion_max_tokens,
             messages=[
                 {"role": "system", "content": self.question_maker_system_prompt},
                 {
@@ -239,7 +253,7 @@ class SyntheticEvaluation(BaseEvaluation):
             rounds += 1
 
     def _get_sim(self, target, references):
-        response = self.client.embeddings.create(input=[target] + references, model="text-embedding-3-large")
+        response = self.embedding_client.embeddings.create(input=[target] + references, model=self.embedding_model_name)
         nparray1 = np.array(response.data[0].embedding)
 
         full_sim = []
@@ -306,7 +320,7 @@ class SyntheticEvaluation(BaseEvaluation):
 
         questions = corpus_questions_df["question"].tolist()
 
-        response = self.client.embeddings.create(input=questions, model="text-embedding-3-large")
+        response = self.embedding_client.embeddings.create(input=questions, model=self.embedding_model_name)
 
         embeddings_matrix = np.array([data.embedding for data in response.data])
 
