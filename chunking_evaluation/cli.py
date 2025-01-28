@@ -44,6 +44,34 @@ class NomicSentenceTransformerEmbeddingFunction(SentenceTransformerEmbeddingFunc
         )
 
 
+class TaskedSentenceTransformerEmbeddingFunction(SentenceTransformerEmbeddingFunction):
+    def __init__(
+        self,
+        model_name: str = "all-MiniLM-L6-v2",
+        device: str = "cpu",
+        normalize_embeddings: bool = False,
+        task: str = "",
+        **kwargs: Any,
+    ):
+        super().__init__(model_name=model_name, device=device, normalize_embeddings=normalize_embeddings, **kwargs)
+        assert task != "", "Task cannot be empty"
+        self.task: str = task
+
+    def __call__(self, input: Documents) -> Embeddings:
+        return cast(
+            Embeddings,
+            [  # noqa: C416
+                embedding
+                for embedding in self._model.encode(
+                    list(input),
+                    task=self.task,
+                    convert_to_numpy=True,
+                    normalize_embeddings=self._normalize_embeddings,
+                )
+            ],
+        )
+
+
 @app.command()
 def evaluate():
     tracking_path = (files("chunking_evaluation") / "../mlflow.db").resolve()
@@ -66,8 +94,20 @@ def evaluate():
             model_name="nomic-ai/nomic-embed-text-v1.5", device="cuda", trust_remote_code=True, prefix="search_query"
         )
 
+        # embedding = SentenceTransformerEmbeddingFunction(
+        #     model_name="billatsectorflow/stella_en_400M_v5", device="cuda", trust_remote_code=True
+        # )
+
+        # query_embedding = TaskedSentenceTransformerEmbeddingFunction(
+        #     model_name="jinaai/jina-embeddings-v3", device="cuda", trust_remote_code=True, task="retrieval.query"
+        # )
+        #
+        # chunk_embedding = TaskedSentenceTransformerEmbeddingFunction(
+        #     model_name="jinaai/jina-embeddings-v3", device="cuda", trust_remote_code=True, task="retrieval.passage"
+        # )
+
         results = evaluation.run(
-            chunker, chunk_embedding_function=chunk_embedding, query_embedding_function=query_embedding
+            chunker, chunk_embedding_function=query_embedding, query_embedding_function=chunk_embedding
         )
 
         del results["corpora_scores"]  # TODO log more details
