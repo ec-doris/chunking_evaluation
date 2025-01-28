@@ -106,6 +106,8 @@ def evaluate():
         #     model_name="jinaai/jina-embeddings-v3", device="cuda", trust_remote_code=True, task="retrieval.passage"
         # )
 
+        mlflow.log_param("query_embedding", query_embedding.model_name)
+        mlflow.log_param("chunk_embedding", chunk_embedding.model_name)
         results = evaluation.run(
             chunker, chunk_embedding_function=query_embedding, query_embedding_function=chunk_embedding
         )
