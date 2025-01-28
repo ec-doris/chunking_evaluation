@@ -91,31 +91,17 @@ def evaluate():
         mlflow.log_param("questions_path", evaluation.questions_csv_path)
 
         chunk_embedding = NomicSentenceTransformerEmbeddingFunction(
-            # model_name="nomic-ai/nomic-embed-text-v1.5", device="cuda", trust_remote_code=True, prefix="search_document"
             model_name="lightonai/modernbert-embed-large",
             device="cuda",
             trust_remote_code=True,
             prefix="search_document",
         )
         query_embedding = NomicSentenceTransformerEmbeddingFunction(
-            # model_name="nomic-ai/nomic-embed-text-v1.5", device="cuda", trust_remote_code=True, prefix="search_query"
             model_name="lightonai/modernbert-embed-large",
             device="cuda",
             trust_remote_code=True,
             prefix="search_query",
         )
-
-        # embedding = SentenceTransformerEmbeddingFunction(
-        #     model_name="billatsectorflow/stella_en_400M_v5", device="cuda", trust_remote_code=True
-        # )
-
-        # query_embedding = TaskedSentenceTransformerEmbeddingFunction(
-        #     model_name="jinaai/jina-embeddings-v3", device="cuda", trust_remote_code=True, task="retrieval.query"
-        # )
-        #
-        # chunk_embedding = TaskedSentenceTransformerEmbeddingFunction(
-        #     model_name="jinaai/jina-embeddings-v3", device="cuda", trust_remote_code=True, task="retrieval.passage"
-        # )
 
         mlflow.log_param("query_embedding", query_embedding.model_name)
         mlflow.log_param("chunk_embedding", chunk_embedding.model_name)
@@ -139,6 +125,8 @@ def generate_data(
     embedding_base_url: Annotated[str, typer.Option()],
     embedding_api_key: Annotated[str, typer.Option()],
     embedding_model_name: Annotated[str, typer.Option()],
+    n_rounds: int = -1,
+    n_queries: int = 5,
 ):
     evaluation = SyntheticEvaluation(
         corpora_paths=[str(p) for p in corpora_path.glob("*.txt")],
@@ -150,7 +138,7 @@ def generate_data(
     )
 
     # Generate queries and excerpts, and save to CSV
-    evaluation.generate_queries_and_excerpts()
+    evaluation.generate_queries_and_excerpts(num_rounds=-1)
 
     # Apply filter to remove queries with poor excerpts
     evaluation.filter_poor_excerpts(threshold=0.36)
