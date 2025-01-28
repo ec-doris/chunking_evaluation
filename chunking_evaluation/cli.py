@@ -88,10 +88,18 @@ def evaluate():
         mlflow.log_param("questions_path", evaluation.questions_csv_path)
 
         chunk_embedding = NomicSentenceTransformerEmbeddingFunction(
-            model_name="nomic-ai/nomic-embed-text-v1.5", device="cuda", trust_remote_code=True, prefix="search_document"
+            # model_name="nomic-ai/nomic-embed-text-v1.5", device="cuda", trust_remote_code=True, prefix="search_document"
+            model_name="lightonai/modernbert-embed-large",
+            device="cuda",
+            trust_remote_code=True,
+            prefix="search_document",
         )
         query_embedding = NomicSentenceTransformerEmbeddingFunction(
-            model_name="nomic-ai/nomic-embed-text-v1.5", device="cuda", trust_remote_code=True, prefix="search_query"
+            # model_name="nomic-ai/nomic-embed-text-v1.5", device="cuda", trust_remote_code=True, prefix="search_query"
+            model_name="lightonai/modernbert-embed-large",
+            device="cuda",
+            trust_remote_code=True,
+            prefix="search_query",
         )
 
         # embedding = SentenceTransformerEmbeddingFunction(
