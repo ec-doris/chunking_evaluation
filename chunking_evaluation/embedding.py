@@ -6,7 +6,7 @@ from chromadb.utils.embedding_functions.sentence_transformer_embedding_function 
 )
 
 
-class NomicSentenceTransformerEmbeddingFunction(SentenceTransformerEmbeddingFunction):
+class InstructedSentenceTransformerEmbeddingFunction(SentenceTransformerEmbeddingFunction):
     def __init__(
         self,
         model_name: str = "all-MiniLM-L6-v2",
