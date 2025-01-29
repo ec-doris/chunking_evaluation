@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 import random
 from importlib import resources
@@ -10,6 +11,8 @@ from openai import OpenAI
 
 from chunking_evaluation.evaluation_framework.base_evaluation import BaseEvaluation
 from chunking_evaluation.utils import rigorous_document_search
+
+logger = logging.getLogger(__name__)
 
 
 class SyntheticEvaluation(BaseEvaluation):
@@ -210,7 +213,7 @@ class SyntheticEvaluation(BaseEvaluation):
         while i < n:
             while True:
                 try:
-                    print(f"Trying Query {i}")
+                    logger.info(f"Trying Query {i}")
                     questions_list = self.synth_questions_df[self.synth_questions_df["corpus_id"] == corpus_id][
                         "question"
                     ].tolist()
@@ -232,7 +235,7 @@ class SyntheticEvaluation(BaseEvaluation):
 
                     break
                 except (ValueError, json.JSONDecodeError) as e:
-                    print(f"Error occurred: {e}")
+                    logger.error(f"Error occurred: {e}")
                     continue
             i += 1
 
@@ -285,7 +288,7 @@ class SyntheticEvaluation(BaseEvaluation):
 
         count_after = len(corpus_questions_df)
 
-        print(f"Corpus: {corpus_id} - Removed {count_before - count_after} .")
+        logger.info(f"Corpus: {corpus_id} - Removed {count_before - count_after} .")
 
         corpus_questions_df["references"] = corpus_questions_df["references"].apply(json.dumps)
 
@@ -358,7 +361,7 @@ class SyntheticEvaluation(BaseEvaluation):
 
         count_after = len(corpus_questions_df)
 
-        print(f"Corpus: {corpus_id} - Removed {count_before - count_after} .")
+        logger.info(f"Corpus: {corpus_id} - Removed {count_before - count_after} .")
 
         corpus_questions_df["references"] = corpus_questions_df["references"].apply(json.dumps)
 

@@ -1,7 +1,6 @@
 import logging
 from importlib.resources import files
 from pathlib import Path
-from pprint import pprint
 from typing import Annotated
 
 import mlflow
@@ -14,9 +13,10 @@ from chunking_evaluation.chunking import RecursiveTokenChunker
 from chunking_evaluation.embedding import NomicSentenceTransformerEmbeddingFunction
 from chunking_evaluation.evaluation_framework.base_evaluation import BaseEvaluation
 
-app = Typer()
+app = Typer(pretty_exceptions_show_locals=False)
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s -  %(name)s - %(levelname)s - %(message)s")
+logger = logging.getLogger("cli")
 
 
 @app.command()
@@ -56,9 +56,12 @@ def evaluate(corpus_path: Path, questions_path: Path, experiment: str = ""):
             chunker, chunk_embedding_function=query_embedding, query_embedding_function=chunk_embedding
         )
 
-        del results["corpora_scores"]  # TODO log more details
+        del results["corpora_scores"]
         mlflow.log_metrics(results)
-    pprint(results)
+    logger.info(f"IOU : {results['iou_mean']:.4}")
+    logger.info(f"PREC: {results['precision_mean']:.4}")
+    logger.info(f"REC : {results['recall_mean']:.4}")
+    logger.info(f"PREC_OMEGA: {results['precision_omega_mean']:.4}")
 
 
 @app.command()
