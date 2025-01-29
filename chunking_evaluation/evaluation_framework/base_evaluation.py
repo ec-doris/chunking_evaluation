@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 from importlib import resources
 
@@ -7,6 +8,8 @@ import numpy as np
 import pandas as pd
 
 from chunking_evaluation.utils import get_openai_embedding_function, rigorous_document_search
+
+logger = logging.getLogger(__name__)
 
 
 def sum_of_ranges(ranges):
@@ -139,7 +142,7 @@ class BaseEvaluation:
                 try:
                     _, start_index, end_index = rigorous_document_search(corpus, document)
                 except:
-                    print(f"Error in finding {document} in {corpus_id}")
+                    logger.error(f"Error in finding {document} in {corpus_id}")
                     raise Exception(f"Error in finding {document} in {corpus_id}")
                 # start_index, end_index = find_target_in_document(corpus, document)
                 current_metadatas.append({"start_index": start_index, "end_index": end_index, "corpus_id": corpus_id})
@@ -299,9 +302,9 @@ class BaseEvaluation:
                 collection = chunk_client.create_collection(
                     collection_name, embedding_function=embedding_function, metadata={"hnsw:search_ef": 50}
                 )
-                print("Created collection: ", collection_name)
+                logger.info("Created collection: ", collection_name)
             except Exception as e:
-                print("Failed to create collection: ", e)
+                logger.exception("Failed to create collection: ", e)
                 pass
                 # This shouldn't throw but for whatever reason, if it does we will default to below.
 
@@ -324,8 +327,8 @@ class BaseEvaluation:
             batch_ids = [str(i) for i in range(i, i + len(batch_docs))]
             collection.add(documents=batch_docs, metadatas=batch_metas, ids=batch_ids)
 
-            # print("Documents: ", batch_docs)
-            # print("Metadatas: ", batch_metas)
+            logger.debug("Documents: ", batch_docs)
+            logger.debug("Metadatas: ", batch_metas)
 
         return collection
 
@@ -406,7 +409,7 @@ class BaseEvaluation:
                                 "auto_questions_openai_small", embedding_function=query_embedding_function
                             )
                     except Exception as e:
-                        print(
+                        logger.exception(
                             "Warning: Failed to use the frozen embeddings originally used in the paper. As a result, this package will now generate a new set of embeddings. The change should be minimal and only come from the noise floor of OpenAI's embedding function. The error: ",
                             e,
                         )
@@ -416,7 +419,7 @@ class BaseEvaluation:
                             "auto_questions_sentence_transformer", embedding_function=query_embedding_function
                         )
                     except Exception as e:
-                        print(
+                        logger.exception(
                             "Warning: Failed to use the frozen embeddings originally used in the paper. As a result, this package will now generate a new set of embeddings. The change should be minimal and only come from the noise floor of SentenceTransformer's embedding function. The error: ",
                             e,
                         )
@@ -492,10 +495,10 @@ class BaseEvaluation:
         precision_mean = np.mean(precision_scores)
         precision_std = np.std(precision_scores)
 
-        # print("Recall scores: ", recall_scores)
-        # print("Precision scores: ", precision_scores)
-        # print("Recall Mean: ", recall_mean)
-        # print("Precision Mean: ", precision_mean)
+        logger.debug("Recall scores: " + str(recall_scores))
+        logger.debug("Precision scores: " + str(precision_scores))
+        logger.debug(f"Recall Mean: {recall_mean:.2}")
+        logger.debug(f"Precision Mean: {precision_mean:.2}")
 
         return {
             "corpora_scores": corpora_scores,

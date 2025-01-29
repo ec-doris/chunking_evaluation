@@ -1,3 +1,5 @@
+import logging
+
 import anthropic
 import backoff
 from tqdm import tqdm
@@ -5,6 +7,8 @@ from tqdm import tqdm
 from chunking_evaluation.chunking.base_chunker import BaseChunker
 from chunking_evaluation.chunking.recursive_token_chunker import RecursiveTokenChunker
 from chunking_evaluation.utils import openai_token_count
+
+logger = logging.getLogger(__name__)
 
 
 class AnthropicClient:
@@ -24,7 +28,7 @@ class AnthropicClient:
             )
             return message.content[0].text
         except Exception as e:
-            print(f"Error occurred: {e}, retrying...")
+            logger.exception(f"Error occurred: {e}, retrying...")
             raise e
 
 
@@ -46,7 +50,7 @@ class OpenAIClient:
 
             return completion.choices[0].message.content
         except Exception as e:
-            print(f"Error occurred: {e}, retrying...")
+            logger.error(f"Error occurred: {e}, retrying...")
             raise e
 
 
@@ -149,8 +153,8 @@ class LLMSemanticChunker(BaseChunker):
                         break
                     else:
                         messages = self.get_prompt(chunked_input, current_chunk, numbers)
-                        print("Response: ", result_string)
-                        print("Invalid response. Please try again.")
+                        logger.info("Response: " + result_string)
+                        logger.warning("Invalid response. Please try again.")
 
                 split_indices.extend(numbers)
 
