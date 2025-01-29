@@ -135,10 +135,11 @@ def generate_data(
         completion_model_name=generation_model_name,
         embedding_client=OpenAI(base_url=embedding_base_url, api_key=embedding_api_key),
         embedding_model_name=embedding_model_name,
+        completion_max_tokens=2000,
     )
 
     # Generate queries and excerpts, and save to CSV
-    evaluation.generate_queries_and_excerpts(num_rounds=-1)
+    evaluation.generate_queries_and_excerpts(num_rounds=n_rounds, queries_per_corpus=n_queries)
 
     # Apply filter to remove queries with poor excerpts
     evaluation.filter_poor_excerpts(threshold=0.36)
