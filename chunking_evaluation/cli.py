@@ -221,7 +221,7 @@ def generate_data(
     n_queries: int = 5,
     max_tokens: int = 1024,
     poor_excerpts_threshold: float = 0.36,
-    duplicate_threshold: float = 0.6,
+    duplicate_threshold: float = 0.78,
 ):
     evaluation = SyntheticEvaluation(
         corpora_paths=[str(p) for p in corpora_path.glob("*.txt")],
