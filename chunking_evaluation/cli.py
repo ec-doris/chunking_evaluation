@@ -14,8 +14,7 @@ from openai import OpenAI
 from typer import Typer
 
 from chunking_evaluation import SyntheticEvaluation
-from chunking_evaluation.chunking import RecursiveTokenChunker
-from chunking_evaluation.chunking.fixed_token_chunker import FixedTokenChunker
+from chunking_evaluation.chunking import FixedTokenChunker, KamradtModifiedChunker, RecursiveTokenChunker
 from chunking_evaluation.embedding import (
     InstructedSentenceTransformerEmbeddingFunction,
     PromptedSentenceTransformerEmbeddingFunction,
@@ -23,7 +22,7 @@ from chunking_evaluation.embedding import (
 )
 from chunking_evaluation.evaluation_framework.base_evaluation import BaseEvaluation
 
-app = Typer(pretty_exceptions_show_locals=False)
+app = Typer(pretty_exceptions_show_locals=False, pretty_exceptions_enable=False)
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s -  %(name)s - %(levelname)s - %(message)s")
 logger = logging.getLogger("cli")
@@ -128,6 +127,41 @@ class ChunkingExperimentator:
                 {"chunk_size": 800, "chunk_overlap": 400},
                 {"chunk_size": 800, "chunk_overlap": 100},
                 {"chunk_size": 800, "chunk_overlap": 0},
+            ],
+        ),
+        (
+            KamradtModifiedChunker,
+            [
+                {
+                    "avg_chunk_size": 400,
+                    "min_chunk_size": 100,
+                    "embedding_function": InstructedSentenceTransformerEmbeddingFunction(
+                        model_name="lightonai/modernbert-embed-large",
+                        device="cuda",
+                        trust_remote_code=True,
+                        prefix="clustering",
+                    ),
+                },
+                {
+                    "avg_chunk_size": 400,
+                    "min_chunk_size": 200,
+                    "embedding_function": InstructedSentenceTransformerEmbeddingFunction(
+                        model_name="lightonai/modernbert-embed-large",
+                        device="cuda",
+                        trust_remote_code=True,
+                        prefix="clustering",
+                    ),
+                },
+                {
+                    "avg_chunk_size": 800,
+                    "min_chunk_size": 200,
+                    "embedding_function": InstructedSentenceTransformerEmbeddingFunction(
+                        model_name="lightonai/modernbert-embed-large",
+                        device="cuda",
+                        trust_remote_code=True,
+                        prefix="clustering",
+                    ),
+                },
             ],
         ),
         # (
