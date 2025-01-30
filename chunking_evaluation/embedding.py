@@ -32,6 +32,33 @@ class InstructedSentenceTransformerEmbeddingFunction(SentenceTransformerEmbeddin
         )
 
 
+class PromptedSentenceTransformerEmbeddingFunction(SentenceTransformerEmbeddingFunction):
+    def __init__(
+        self,
+        model_name: str = "all-MiniLM-L6-v2",
+        device: str = "cpu",
+        normalize_embeddings: bool = False,
+        prompt: str = "",
+        **kwargs: Any,
+    ):
+        super().__init__(model_name=model_name, device=device, normalize_embeddings=normalize_embeddings, **kwargs)
+        self.prompt: str = prompt
+
+    def __call__(self, input: Documents) -> Embeddings:
+        return cast(
+            Embeddings,
+            [  # noqa: C416
+                embedding
+                for embedding in self._model.encode(
+                    list(input),
+                    convert_to_numpy=True,
+                    normalize_embeddings=self._normalize_embeddings,
+                    prompt_name=self.prompt,
+                )
+            ],
+        )
+
+
 class TaskedSentenceTransformerEmbeddingFunction(SentenceTransformerEmbeddingFunction):
     def __init__(
         self,
