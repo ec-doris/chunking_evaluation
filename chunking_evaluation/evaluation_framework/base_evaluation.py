@@ -280,13 +280,13 @@ class BaseEvaluation:
             )
             iou_denominator = precision_denominator + sum_of_ranges(unused_highlights)
 
-            recall_score = numerator_value / recall_denominator
+            recall_score = numerator_value / recall_denominator if recall_denominator > 0 else 0
             recall_scores.append(recall_score)
 
-            precision_score = numerator_value / precision_denominator
+            precision_score = numerator_value / precision_denominator if precision_denominator > 0 else 0
             precision_scores.append(precision_score)
 
-            iou_score = numerator_value / iou_denominator
+            iou_score = numerator_value / iou_denominator if iou_denominator > 0 else 0
             iou_scores.append(iou_score)
 
         return iou_scores, recall_scores, precision_scores
