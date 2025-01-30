@@ -14,10 +14,11 @@ from openai import OpenAI
 from typer import Typer
 
 from chunking_evaluation import SyntheticEvaluation
-from chunking_evaluation.chunking import RecursiveTokenChunker
+from chunking_evaluation.chunking import LLMSemanticChunker, RecursiveTokenChunker
 from chunking_evaluation.chunking.fixed_token_chunker import FixedTokenChunker
 from chunking_evaluation.embedding import (
     InstructedSentenceTransformerEmbeddingFunction,
+    PromptedSentenceTransformerEmbeddingFunction,
     TaskedSentenceTransformerEmbeddingFunction,
 )
 from chunking_evaluation.evaluation_framework.base_evaluation import BaseEvaluation
@@ -60,6 +61,10 @@ EMBEDDINGS = [
             model_name="all-MiniLM-L6-v2",
             device="cuda",
         ),
+    ),
+    (
+        PromptedSentenceTransformerEmbeddingFunction(model_name="jxm/cde-small-v2", device="cuda", prompt="document"),
+        PromptedSentenceTransformerEmbeddingFunction(model_name="jxm/cde-small-v2", device="cuda", prompt="query"),
     ),
     (
         InstructedSentenceTransformerEmbeddingFunction(
@@ -119,6 +124,16 @@ CHUNKERS = [
             {"chunk_size": 800, "chunk_overlap": 0},
         ],
     ),
+    (
+        LLMSemanticChunker,
+        [
+            {
+                "organisation": None,
+                "client": OpenAI(base_url="https://litellm.doris.dev.cnect.eu/v1", api_key=""),
+                "model_name": "anthropic.claude-3-5-sonnet-20240620-v1:0",
+            }
+        ],
+    ),
 ]
 
 
@@ -129,10 +144,12 @@ def evaluate(corpus_path: Path, questions_path: Path, experiment: str = ""):
     mlflow.tracking.set_tracking_uri("sqlite:///" + str(tracking_path))
     mlflow.set_experiment(experiment)
 
-    for chunker_cls, chunker_params_list in CHUNKERS:
+    for chunker_cls, chunker_params_list in CHUNKERS[-1:]:
         for chunker_params in chunker_params_list:
             chunker = chunker_cls(**chunker_params)
-            run_name = f"{chunker.__class__.__name__}_" + "_".join(f"{k}_{v}" for k, v in chunker_params.items())
+            run_name = f"{chunker.__class__.__name__}_" + "_".join(
+                f"{k}_{v}" for k, v in chunker_params.items() if v is not None
+            )
             logger.info(f"Running {run_name}")
 
             with mlflow.start_run(run_name=run_name or None) as run:

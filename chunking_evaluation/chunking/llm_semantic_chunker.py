@@ -2,6 +2,7 @@ import logging
 
 import anthropic
 import backoff
+from openai import OpenAI
 from tqdm import tqdm
 
 from chunking_evaluation.chunking.base_chunker import BaseChunker
@@ -54,6 +55,13 @@ class OpenAIClient:
             raise e
 
 
+# noinspection PyMissingConstructor
+class OpenAICompatibleClient(OpenAIClient):
+    def __init__(self, client: OpenAI, model_name):
+        self.client = client
+        self.model_name = model_name
+
+
 class LLMSemanticChunker(BaseChunker):
     """
     LLMSemanticChunker is a class designed to split text into thematically consistent sections based on suggestions from a Language Model (LLM).
@@ -66,7 +74,7 @@ class LLMSemanticChunker(BaseChunker):
                                     Users can specify a different model by providing this argument.
     """
 
-    def __init__(self, organisation: str = "openai", api_key: str = None, model_name: str = None):
+    def __init__(self, organisation: str = "openai", api_key: str = None, model_name: str = None, client=None):
         if organisation == "openai":
             if model_name is None:
                 model_name = "gpt-4o"
@@ -75,6 +83,8 @@ class LLMSemanticChunker(BaseChunker):
             if model_name is None:
                 model_name = "claude-3-5-sonnet-20240620"
             self.client = AnthropicClient(model_name, api_key=api_key)
+        elif client is not None:
+            self.client = OpenAICompatibleClient(client, model_name)
         else:
             raise ValueError("Invalid organisation. Please choose either 'openai' or 'anthropic'.")
 
